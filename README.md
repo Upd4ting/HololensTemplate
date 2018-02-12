@@ -1,0 +1,2 @@
+# HololensTemplate
+Basic Hololens template
