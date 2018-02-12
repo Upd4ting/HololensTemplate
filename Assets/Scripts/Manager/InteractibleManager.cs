@@ -17,8 +17,6 @@ public class InteractibleManager : Singleton<InteractibleManager>
 
     void Update()
     {
-        /* TODO: DEVELOPER CODING EXERCISE 2.c */
-
         oldFocusedGameObject = FocusedGameObject;
 
         if (GazeManager.Instance.Hit)

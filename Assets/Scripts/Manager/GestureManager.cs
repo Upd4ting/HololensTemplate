@@ -4,9 +4,22 @@ using UnityEngine.XR.WSA.Input;
 /// <summary>
 /// GestureManager contains event handlers for subscribed gestures.
 /// </summary>
-public class GestureManager : MonoBehaviour
+public class GestureManager : Singleton<GestureManager>
 {
     private GestureRecognizer gestureRecognizer;
+
+    public GestureRecognizer GestureRecognizer
+    {
+        get
+        {
+            return gestureRecognizer;
+        }
+
+        set
+        {
+            gestureRecognizer = value;
+        }
+    }
 
     void Start()
     {
