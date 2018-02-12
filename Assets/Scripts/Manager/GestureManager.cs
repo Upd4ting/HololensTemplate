@@ -21,7 +21,7 @@ public class GestureManager : Singleton<GestureManager>
         }
     }
 
-    void Start()
+    void Awake()
     {
         gestureRecognizer = new GestureRecognizer();
         gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
@@ -30,7 +30,7 @@ public class GestureManager : Singleton<GestureManager>
         {
             GameObject focusedObject = InteractibleManager.Instance.FocusedGameObject;
 
-            if (focusedObject != null)
+            if (focusedObject != null && focusedObject.GetComponent<Interactible>() != null)
             {
                 focusedObject.SendMessage("OnSelect");
             }
