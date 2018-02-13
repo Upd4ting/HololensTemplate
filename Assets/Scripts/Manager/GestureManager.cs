@@ -1,46 +1,53 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
 /// <summary>
-/// GestureManager contains event handlers for subscribed gestures.
+///     GestureManager contains event handlers for subscribed gestures.
 /// </summary>
 public class GestureManager : Singleton<GestureManager>
 {
-    private GestureRecognizer gestureRecognizer;
+    public GestureRecognizer GestureRecognizer { get; private set; }
 
-    public GestureRecognizer GestureRecognizer
+    private void Awake()
     {
-        get
-        {
-            return gestureRecognizer;
-        }
+        GestureRecognizer = new GestureRecognizer();
+        // Ecoute de tous les events
+        //GestureRecognizer.SetRecognizableGestures(GestureSettings.);
 
-        set
-        {
-            gestureRecognizer = value;
-        }
-    }
-
-    void Awake()
-    {
-        gestureRecognizer = new GestureRecognizer();
-        gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
-
-        gestureRecognizer.Tapped += (args) =>
+        GestureRecognizer.Tapped += args =>
         {
             GameObject focusedObject = InteractibleManager.Instance.FocusedGameObject;
-
             if (focusedObject != null && focusedObject.GetComponent<Interactible>() != null)
-            {
-                focusedObject.SendMessage("OnSelect");
-            }
+                focusedObject.GetComponent<Interactible>().OnSelect();
         };
 
-        gestureRecognizer.StartCapturingGestures();
+        GestureRecognizer.HoldStarted += args =>
+        {
+            GameObject focusedObject = InteractibleManager.Instance.FocusedGameObject;
+            if (focusedObject != null && focusedObject.GetComponent<Draggable>() != null)
+                focusedObject.GetComponent<Draggable>().OnHoloDragEnter();
+        };
+
+        GestureRecognizer.HoldCompleted += args =>
+        {
+            GameObject focusedObject = InteractibleManager.Instance.FocusedGameObject;
+            if (focusedObject != null && focusedObject.GetComponent<Draggable>() != null)
+                focusedObject.GetComponent<Draggable>().OnHoloDragComplete();
+        };
+
+        GestureRecognizer.HoldCanceled += args =>
+        {
+            GameObject focusedObject = InteractibleManager.Instance.FocusedGameObject;
+            if (focusedObject != null && focusedObject.GetComponent<Draggable>() != null)
+                focusedObject.GetComponent<Draggable>().OnHoloDragCancel();
+        };
+
+        GestureRecognizer.StartCapturingGestures();
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
-        gestureRecognizer.StopCapturingGestures();
+        GestureRecognizer.StopCapturingGestures();
     }
 }
