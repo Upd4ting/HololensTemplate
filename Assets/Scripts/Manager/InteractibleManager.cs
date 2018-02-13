@@ -21,15 +21,7 @@ public class InteractibleManager : Singleton<InteractibleManager>
 
         if (GazeManager.Instance.Hit)
         {
-            RaycastHit hitInfo = GazeManager.Instance.HitInfo;
-            if (hitInfo.collider != null)
-            {
-                FocusedGameObject = hitInfo.collider.gameObject;
-            }
-            else
-            {
-                FocusedGameObject = null;
-            }
+            FocusedGameObject = GazeManager.Instance.HitObject;
         }
         else
         {
@@ -44,7 +36,7 @@ public class InteractibleManager : Singleton<InteractibleManager>
             {
                 if (FocusedGameObject.GetComponent<Interactible>() != null)
                 {
-                    FocusedGameObject.SendMessage("GazeEntered");
+                    FocusedGameObject.GetComponent<Interactible>().OnGazeEntered();
                 }
             }
         }
@@ -56,7 +48,7 @@ public class InteractibleManager : Singleton<InteractibleManager>
         {
             if (oldFocusedGameObject.GetComponent<Interactible>() != null)
             {
-                oldFocusedGameObject.SendMessage("GazeExited");
+                FocusedGameObject.GetComponent<Interactible>().OnGazeExited();
             }
         }
     }

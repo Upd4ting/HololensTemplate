@@ -2,33 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuAction : MonoBehaviour
+public class MenuAction : Interactible
 {
+    public GameObject handler { get; set; }
 
-    private GameObject handler;
-
-    public GameObject Handler
-    {
-        get
-        {
-            return handler;
-        }
-
-        set
-        {
-            handler = value;
-        }
-    }
-
-    public void Awake()
-    {
-        GameObject go = this.gameObject;
-
-        if (go.GetComponent<Interactible>() == null)
-            go.AddComponent<Interactible>();
-    }
-
-    public void OnSelect()
+    public override void OnSelect()
     {
         handler.SendMessage("OnUIClicked", this.gameObject.name);
     }

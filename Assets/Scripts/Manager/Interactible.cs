@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Interactible : MonoBehaviour
+public abstract class Interactible : MonoBehaviour
 {
-    // Used like an interface for InteractibleManager
+    public abstract void OnSelect();
+
+    public void OnGazeEntered() { }
+
+    public void OnGazeExited() { }
 }

@@ -8,11 +8,11 @@ public class MenuSpawner : MonoBehaviour
     [Tooltip("Menu canvas to spawn once the player is in range")]
     public GameObject menu;
 
+    [Tooltip("Handler that will handle click on items")]
+    public GameObject handler;
+
     [Tooltip("On which GameObject the menu should spawn")]
     public GameObject target;
-
-    [Tooltip("Handle that will received onUIClicked message")]
-    public GameObject handler;
 
     [Tooltip("The angle where the UI will pop")]
     public int angle = 90;
@@ -23,20 +23,29 @@ public class MenuSpawner : MonoBehaviour
     [Tooltip("Meter range that we need to be in to display the menu")]
     public int range = 10;
 
+    [Tooltip("Pop menu on click and not when in range")]
+    public bool popMenuClick = false;
+
+    private bool menuVisible = false;
+
 	void Awake ()
     {
         if (menu == null || target == null || handler == null)
             return;
 
-        // Add MenuAction to each childs of Menu game object.
+        if (popMenuClick)
+        {
+            MenuTarget mt = target.AddComponent<MenuTarget>();
+            mt.ms = this;
+        }
 
         Transform transform = menu.transform;
 
         for (int i = 0; i < transform.childCount; i++)
         {
-            GameObject go = menu.transform.GetChild(i).gameObject;
-            MenuAction action = go.AddComponent<MenuAction>();
-            action.Handler = handler;
+            GameObject go = transform.GetChild(i).gameObject;
+            MenuAction ma = go.AddComponent<MenuAction>();
+            ma.handler = handler;
         }
 	}
 	
@@ -53,21 +62,33 @@ public class MenuSpawner : MonoBehaviour
 
         float distance = sub.magnitude;
 
-        if (distance > range)
+        if (!popMenuClick)
         {
-            menu.SetActive(false);
-            return;
+            menuVisible = distance <= range;
         }
 
-        Quaternion quat = Quaternion.Euler(new Vector3(0, angle, 0));
-        sub.Normalize();
+        if (menuVisible)
+        {
+            Quaternion quat = Quaternion.Euler(new Vector3(0, angle, 0));
+            sub.Normalize();
 
-        Vector3 menupos = target.transform.position + quat * sub * offset;
+            Vector3 menupos = target.transform.position + quat * sub * offset;
 
-        menu.transform.position = menupos;
-        menu.SetActive(true);
+            menu.transform.position = menupos;
 
-        if (menu.GetComponent<Billboard>() == null)
-            menu.AddComponent<Billboard>();
+            if (menu.GetComponent<Billboard>() == null)
+                menu.AddComponent<Billboard>();
+
+            menu.SetActive(true);
+        }
+        else
+            menu.SetActive(false);
     }
+
+    public void OnTargetClicked()
+    {
+        menuVisible = !menuVisible;
+    }
+
+
 }
