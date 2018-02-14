@@ -1,114 +1,112 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using UnityEngine;
 
-namespace Assets.Scripts.StateManager
-{
-    internal class StateManager : Singleton<StateManager>
-    {
-        public class StateManagerException : Exception
-        {
-            public StateManagerException(string message) : base(message)
-            {}
-        }
+namespace Assets.Scripts.StateManager {
+    internal class StateManager : Singleton<StateManager> {
+        public delegate void EventManager();
 
-        public enum RunningState
-        {
+        public enum RunningState {
             Running,
             Stopped,
             Paused
         }
 
-        [SerializeField] private readonly bool _autoStart = true;
+        [SerializeField]
+        private readonly bool _autoStart = true;
 
-        [SerializeField] private readonly List<IState> _list = new List<IState>();
+        [SerializeField]
+        private readonly List<IState> _list = new List<IState>();
 
         private int _index;
 
-        private RunningState _running;
+        private RunningState      _running;
+        public event EventManager OnStartWorking;
+        public event EventManager OnElementChanging;
+        public event EventManager OnFinishWorking;
+        public event EventManager OnCancelWorking;
+        public event EventManager OnPauseWorking;
+        public event EventManager OnResumeWorking;
 
-        private void OnStart()
-        {
-            if (this._autoStart)
-            {
-                Start();
-            }
-        }
-
-        private void OnUpdate()
-        {
-            if (this._running == RunningState.Running)
-            {
-                IState state = this._list[this._index];
-                state.OnUpdate();
-                if (state.IsFinished() && this._index + 1 < this._list.Count)
-                    Next(state.GetParams());
-            }
-        }
-
-        private void OnFixedUpdate()
-        {
-            if (this._running == RunningState.Running)
-                this._list[this._index].OnFixedUpdate();
-        }
-
-        public void Restart()
-        {
+        public void Restart() {
             Stop();
             Start();
         }
 
-        public void Start(int index)
-        {
-            if (this._list.Count == 0) throw new StateManagerException("List array can't be empty");
-
-            this._index = index;
-            this._list[this._index].OnStart();
-            this._running = RunningState.Running;
+        public void Start(int index) {
+            if (_list.Count == 0) throw new StateManagerException("List array can't be empty");
+            _index = index;
+            _list[_index].OnStart();
+            OnStartWorking.Invoke();
+            _running = RunningState.Running;
         }
 
-        public void Start()
-        {
-            Start(this._index);
+        public void Start() {
+            Start(_index);
         }
 
-        private void Next(params object[] args)
-        {
-            this._list[this._index++].OnStop();
-            this._list[this._index].OnStart(args);
-        }
-
-        public void Pause()
-        {
-            if (this._running == RunningState.Running)
-                this._running = RunningState.Paused;
-        }
-
-        public void Resume()
-        {
-            if (this._running == RunningState.Paused)
-                this._running = RunningState.Running;
-        }
-
-        public void Stop()
-        {
-            if (this._running == RunningState.Running)
-            {
-                this._list[this._index].OnCancel();
-                this._running = RunningState.Stopped;
+        public void Pause() {
+            if (_running == RunningState.Running) {
+                _running = RunningState.Paused;
+                OnPauseWorking.Invoke();
             }
         }
 
-        public void Reset()
-        {
-            Stop();
-            this._index = 0;
+        public void Resume() {
+            if (_running == RunningState.Paused) {
+                _running = RunningState.Running;
+                OnResumeWorking.Invoke();
+            }
         }
 
-        public void Clear()
-        {
+        public void Stop() {
+            if (_running == RunningState.Running) {
+                _running = RunningState.Stopped;
+                OnCancelWorking.Invoke();
+                _list[_index].OnCancel();
+            }
+        }
+
+        public void Reset() {
             Stop();
-            this._list.Clear();
+            _index = 0;
+        }
+
+        public void Clear() {
+            Stop();
+            _list.Clear();
+        }
+
+        private void OnStart() {
+            if (_autoStart) Start();
+        }
+
+        private void OnUpdate() {
+            if (_running == RunningState.Running) {
+                IState state = _list[_index];
+                state.OnUpdate();
+                if (state.IsFinished())
+                    if (_index + 1 < _list.Count)
+                        Next(state.GetParams());
+                    else
+                        OnFinishWorking.Invoke();
+            }
+        }
+
+        private void OnFixedUpdate() {
+            if (_running == RunningState.Running)
+                _list[_index].OnFixedUpdate();
+        }
+
+        private void Next(params object[] args) {
+            _list[_index++].OnStop();
+            OnElementChanging.Invoke();
+            _list[_index].OnStart(args);
+        }
+
+        public class StateManagerException : Exception {
+            public StateManagerException(string message) : base(message) { }
         }
     }
 }
