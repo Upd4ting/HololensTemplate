@@ -1,10 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.StateManager
 {
     internal class StateManager : Singleton<StateManager>
     {
+        public class StateManagerException : Exception
+        {
+            public StateManagerException(string message) : base(message)
+            {}
+        }
+
         public enum RunningState
         {
             Running,
@@ -23,7 +30,9 @@ namespace Assets.Scripts.StateManager
         private void OnStart()
         {
             if (this._autoStart)
+            {
                 Start();
+            }
         }
 
         private void OnUpdate()
@@ -32,7 +41,7 @@ namespace Assets.Scripts.StateManager
             {
                 IState state = this._list[this._index];
                 state.OnUpdate();
-                if (state.IsFinished())
+                if (state.IsFinished() && this._index + 1 < this._list.Count)
                     Next(state.GetParams());
             }
         }
@@ -51,14 +60,16 @@ namespace Assets.Scripts.StateManager
 
         public void Start(int index)
         {
-            index = this._index;
+            if (this._list.Count == 0) throw new StateManagerException("List array can't be empty");
+
+            this._index = index;
             this._list[this._index].OnStart();
             this._running = RunningState.Running;
         }
 
         public void Start()
         {
-            Start(0);
+            Start(this._index);
         }
 
         private void Next(params object[] args)
@@ -91,6 +102,7 @@ namespace Assets.Scripts.StateManager
         public void Reset()
         {
             Stop();
+            this._index = 0;
         }
 
         public void Clear()
