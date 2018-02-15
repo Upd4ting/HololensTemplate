@@ -34,6 +34,5 @@ sysinfo.txt
 *.unitypackage
 /Assets/Scripts/Test
 /Assets/Scripts/Test.meta
-*.meta
 /ProjectSettings
 /UnityPackageManager
