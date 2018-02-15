@@ -8,9 +8,6 @@ public class MenuSpawner : MonoBehaviour
     [Tooltip("Menu canvas to spawn once the player is in range")]
     public GameObject menu;
 
-    [Tooltip("Handler that will handle click on items")]
-    public GameObject handler;
-
     [Tooltip("On which GameObject the menu should spawn")]
     public GameObject target;
 
@@ -30,7 +27,7 @@ public class MenuSpawner : MonoBehaviour
 
 	void Awake ()
     {
-        if (menu == null || target == null || handler == null)
+        if (menu == null || target == null)
             return;
 
         if (popMenuClick)
@@ -38,20 +35,11 @@ public class MenuSpawner : MonoBehaviour
             MenuTarget mt = target.AddComponent<MenuTarget>();
             mt.ms = this;
         }
-
-        Transform transform = menu.transform;
-
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            GameObject go = transform.GetChild(i).gameObject;
-            MenuAction ma = go.AddComponent<MenuAction>();
-            ma.handler = handler;
-        }
 	}
 	
 	void Update ()
     {
-        if (menu == null || target == null || handler == null)
+        if (menu == null || target == null)
         {
             if (menu != null)
                 menu.SetActive(false);
