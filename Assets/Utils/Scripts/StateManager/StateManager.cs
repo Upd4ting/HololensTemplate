@@ -36,16 +36,17 @@ namespace Assets.Scripts.StateManager {
             Start();
         }
 
-        public void Start(int index) {
+        private void Start() {
+            if (_autoStart)
+                Launch(0);
+        }
+
+        public void Launch(int index) {
             if (_list.Count == 0) throw new StateManagerException("List array can't be empty");
             _index = index;
             _list[_index].OnStart();
             OnStartWorking.Invoke();
             _running = RunningState.Running;
-        }
-
-        public void Start() {
-            Start(_index);
         }
 
         public void Pause() {
@@ -86,10 +87,6 @@ namespace Assets.Scripts.StateManager {
 
         public void Remove(IState state) {
             _list.Remove(state);
-        }
-
-        private void OnStart() {
-            if (_autoStart) Start();
         }
 
         private void OnUpdate() {
