@@ -4,18 +4,18 @@ public abstract class IState
 {
     public abstract bool IsFinished();
     public abstract object[] GetParams();
-    public void OnStart(params object[] args)
+    public virtual void OnStart(params object[] args)
     {}
 
-    public void OnUpdate()
+    public virtual void OnUpdate()
     {}
 
-    public void OnFixedUpdate()
+    public virtual void OnFixedUpdate()
     {}
 
-    public void OnCancel()
+    public virtual void OnCancel()
     {}
 
-    public void OnStop()
+    public virtual void OnStop()
     {}
 }

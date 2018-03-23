@@ -16,9 +16,6 @@ namespace Assets.Scripts.StateManager {
         }
 
         [SerializeField]
-        private readonly bool _autoStart = true;
-
-        [SerializeField]
         private readonly List<IState> _list = new List<IState>();
 
         private int _index;
@@ -33,40 +30,35 @@ namespace Assets.Scripts.StateManager {
 
         public void Restart() {
             Stop();
-            Start();
-        }
-
-        private void Start() {
-            if (_autoStart)
-                Launch(0);
+            Launch(0);
         }
 
         public void Launch(int index) {
             if (_list.Count == 0) throw new StateManagerException("List array can't be empty");
             _index = index;
             _list[_index].OnStart();
-            OnStartWorking.Invoke();
+            OnStartWorking?.Invoke();
             _running = RunningState.Running;
         }
 
         public void Pause() {
             if (_running == RunningState.Running) {
                 _running = RunningState.Paused;
-                OnPauseWorking.Invoke();
+                OnPauseWorking?.Invoke();
             }
         }
 
         public void Resume() {
             if (_running == RunningState.Paused) {
                 _running = RunningState.Running;
-                OnResumeWorking.Invoke();
+                OnResumeWorking?.Invoke();
             }
         }
 
         public void Stop() {
             if (_running == RunningState.Running) {
                 _running = RunningState.Stopped;
-                OnCancelWorking.Invoke();
+                OnCancelWorking?.Invoke();
                 _list[_index].OnCancel();
             }
         }
@@ -89,7 +81,7 @@ namespace Assets.Scripts.StateManager {
             _list.Remove(state);
         }
 
-        private void OnUpdate() {
+        private void Update() {
             if (_running == RunningState.Running) {
                 IState state = _list[_index];
                 state.OnUpdate();
@@ -97,19 +89,20 @@ namespace Assets.Scripts.StateManager {
                     if (_index + 1 < _list.Count)
                         Next(state.GetParams());
                     else
-                        OnFinishWorking.Invoke();
+                        OnFinishWorking?.Invoke();
             }
         }
 
-        private void OnFixedUpdate() {
+        private void FixedUpdate() {
             if (_running == RunningState.Running)
                 _list[_index].OnFixedUpdate();
         }
 
         private void Next(params object[] args) {
             _list[_index++].OnStop();
-            OnElementChanging.Invoke();
+            OnElementChanging?.Invoke();
             _list[_index].OnStart(args);
+            OnStartWorking?.Invoke();
         }
 
         public class StateManagerException : Exception {
