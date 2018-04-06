@@ -1,4 +1,4 @@
-﻿namespace HololensTemplate.Utils {
+﻿    namespace HololensTemplate.Utils {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -13,17 +13,21 @@
 
 
     using UnityEngine;
-
+    /// <summary>
+    /// Class listing every <code>Debug.Log()</code> called from the code, in a file in temp storage
+    /// </summary>
     public class Logs {
         /// <summary>
-        ///     Init
+        /// Logs start listening if in UWP
         /// </summary>
         public static void Init() {
         #if !UNITY_EDITOR && UNITY_WSA
             Application.logMessageReceived += Instance.ApplicationOnLogMessageReceived;
         #endif
         }
-
+        /// <summary>
+        /// Logs stop listening if in UWP
+        /// </summary>
         public static void Stop() {
         #if !UNITY_EDITOR && UNITY_WSA
             Application.logMessageReceived -= Instance.ApplicationOnLogMessageReceived;
