@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-#if !UNITY_EDIOR && UNITY_WSA
+#if !UNITY_EDITOR && UNITY_WSA
     using Windows.Foundation.Diagnostics;
     using Windows.Storage;
 #endif
@@ -56,7 +56,9 @@
             $"Version:       {Application.version}",
             $"Starting time: {DateTime.Now.ToString(CultureInfo.CurrentCulture)}"
         };
-
+        /// <summary>
+        /// 
+        /// </summary>
         private Logs() {
             Create();
             //Creating channel for logging in Holo Web portail 
