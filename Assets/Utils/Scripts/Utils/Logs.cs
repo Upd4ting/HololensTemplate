@@ -1,4 +1,4 @@
-﻿namespace Assets.Scripts {
+﻿namespace HololensTemplate.Utils {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
