@@ -1,32 +1,58 @@
-﻿    namespace HololensTemplate.Utils {
+﻿namespace HololensTemplate.Utils {
+#if !UNITY_EDITOR && UNITY_WSA
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
-#if !UNITY_EDITOR && UNITY_WSA
+
     using Windows.Foundation.Diagnostics;
     using Windows.Storage;
+
+    using UnityEngine;
+
 #endif
 
 
-    using UnityEngine;
     /// <summary>
-    /// Class listing every <code>Debug.Log()</code> called from the code, in a file in temp storage
+    ///     Class listing every <code>Debug.Log()</code> called from the code, in a file in temp storage
     /// </summary>
     public class Logs {
         /// <summary>
-        /// Logs start listening if in UWP
+        ///     Function returning the line when this calls occurs
+        /// </summary>
+        /// <param name="lineNumber"></param>
+        /// <returns></returns>
+        public static int Line([CallerLineNumber] int lineNumber = 0) => lineNumber;
+
+        /// <summary>
+        ///     Function returning the file when this calls occurs
+        /// </summary>
+        /// <param name="fileName">Default value</param>
+        /// <returns>The filename of the caller</returns>
+        public static string File([CallerFilePath] string fileName = "") => fileName;
+
+        /// <summary>
+        /// </summary>
+        /// <param name="membername">Default value</param>
+        /// <returns></returns>
+        public static string MemberName([CallerMemberName] string membername = "") => membername;
+
+        /// <summary>
+        ///     Logs start listening if in UWP
         /// </summary>
         public static void Init() {
+            Debug.Logs("COUCOU");
         #if !UNITY_EDITOR && UNITY_WSA
             Application.logMessageReceived += Instance.ApplicationOnLogMessageReceived;
         #endif
         }
+
         /// <summary>
-        /// Logs stop listening if in UWP
+        ///     Logs stop listening if in UWP
         /// </summary>
         public static void Stop() {
         #if !UNITY_EDITOR && UNITY_WSA
@@ -56,8 +82,8 @@
             $"Version:       {Application.version}",
             $"Starting time: {DateTime.Now.ToString(CultureInfo.CurrentCulture)}"
         };
+
         /// <summary>
-        /// 
         /// </summary>
         private Logs() {
             Create();
@@ -113,6 +139,8 @@
             queue.Enqueue(async () => {
                 ss.Wait();
                 await streamWriter.WriteLineAsync($"[{DateTime.Now.ToString("hh:mm:ss", CultureInfo.CurrentCulture)},{string.Format("{0:0.00000}", timeStartup)}] {level.ToString()}: {condition}");
+                if (!string.IsNullOrEmpty(stackTrace))
+                    await streamWriter.WriteLineAsync($"Stacktrace: {stackTrace}");
                 await streamWriter.FlushAsync();
                 ss.Release();
             });
