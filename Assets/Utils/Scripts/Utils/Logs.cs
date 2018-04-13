@@ -1,18 +1,17 @@
 ﻿namespace HololensTemplate.Utils {
+    using System.Runtime.CompilerServices;
+    using UnityEngine;
 #if !UNITY_EDITOR && UNITY_WSA
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
 
     using Windows.Foundation.Diagnostics;
     using Windows.Storage;
-
-    using UnityEngine;
 
 #endif
 
@@ -54,7 +53,7 @@
             var str    = obj.ToString();
             var output = "";
         #if !UNITY_EDITOR
-            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}] ";
         #endif
             output += str;
             Debug.Log(output);
@@ -64,7 +63,7 @@
             var str    = obj.ToString();
             var output = "";
         #if !UNITY_EDITOR
-            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}] ";
         #endif
             output += str;
             Debug.LogWarning(output);
@@ -74,7 +73,7 @@
             var str    = obj.ToString();
             var output = "";
         #if !UNITY_EDITOR
-            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}] ";
         #endif
             output += str;
             Debug.LogError(output);
