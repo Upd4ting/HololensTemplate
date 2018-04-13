@@ -45,10 +45,39 @@
         ///     Logs start listening if in UWP
         /// </summary>
         public static void Init() {
-            Debug.Logs("COUCOU");
         #if !UNITY_EDITOR && UNITY_WSA
             Application.logMessageReceived += Instance.ApplicationOnLogMessageReceived;
         #endif
+        }
+
+        public static void Log(object obj, [CallerFilePath] string file = default(string), [CallerMemberName] string member = default(string), [CallerLineNumber] int line = default(int)) {
+            var str    = obj.ToString();
+            var output = "";
+        #if !UNITY_EDITOR
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+        #endif
+            output += str;
+            Debug.Log(output);
+        }
+
+        public static void LogWarning(object obj, [CallerFilePath] string file = default(string), [CallerMemberName] string member = default(string), [CallerLineNumber] int line = default(int)) {
+            var str    = obj.ToString();
+            var output = "";
+        #if !UNITY_EDITOR
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+        #endif
+            output += str;
+            Debug.LogWarning(output);
+        }
+
+        public static void LogError(object obj, [CallerFilePath] string file = default(string), [CallerMemberName] string member = default(string), [CallerLineNumber] int line = default(int)) {
+            var str    = obj.ToString();
+            var output = "";
+        #if !UNITY_EDITOR
+            output += $"[{Path.GetFileName(file)} -> {member}:{line}]";
+        #endif
+            output += str;
+            Debug.LogError(output);
         }
 
         /// <summary>
