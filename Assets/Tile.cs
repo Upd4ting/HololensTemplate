@@ -3,25 +3,34 @@
 namespace HololensTemplate {
     public class Tile {
         public const float tilesize = .6f;
+
         /// <inheritdoc />
         public Tile(Vector3 center, bool obstacle = false) {
             Center   = center;
             Obstacle = obstacle;
         }
 
-        public Vector3 Center   { get; } = Vector3.zero;
-        public bool    Obstacle { get; }
-        private GameObject _obj = null;
+        public Vector3    Center   { get; } = Vector3.zero;
+        public GameObject Obj      { get; private set; }
+        public bool       Obstacle { get; }
+
         public void Render() {
             GameObject scene = GameObject.Find("Scene");
-            if (_obj == null) {
-                _obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                _obj.transform.localScale = new Vector3(tilesize / 2 - .01f, .001f, tilesize / 2 - .01f);
-                var v = Center;
+            if (Obj == null) {
+                Obj                      = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Obj.transform.localScale = new Vector3(tilesize / 2 - .01f, .5f, tilesize / 2 - .01f);
+                Vector3 v = Center;
                 v.y                    += .5f;
-                _obj.transform.position =  v;
+                Obj.transform.position =  v;
                 if (scene != null)
-                    _obj.transform.parent   =  scene.transform;
+                    Obj.transform.parent = scene.transform;
+                Obj.AddComponent<TileCollider>();
+
+                Obj.GetComponent<BoxCollider>().isTrigger = true;
+
+                Obj.AddComponent<Rigidbody>().useGravity = false;
+
+                Obj.GetComponent<Renderer>().material.color = Color.blue;
             }
         }
     }

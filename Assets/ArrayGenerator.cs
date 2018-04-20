@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 using HololensTemplate.Utils;
@@ -9,11 +8,9 @@ using HoloToolkit.Unity.SpatialMapping;
 
 using UnityEngine;
 
-using Vuforia;
-
 namespace HololensTemplate {
     public class ArrayGenerator : MonoBehaviour {
-        private       TextToSpeech tts;
+        private TextToSpeech tts;
 
         private void Start() {
             tts = GameObject.Find("tts").GetComponent<TextToSpeech>();
@@ -21,35 +18,48 @@ namespace HololensTemplate {
         }
 
         private IEnumerator Map() {
-            SpatialMappingManager.Instance.StartObserver();
-            yield return new WaitForSeconds(3);
-            ScanFinished();
+            Tile[,] array;
+            do {
+                SpatialMappingManager.Instance.StartObserver();
+                Logs.Log($"Observer state: {SpatialMappingManager.Instance.SurfaceObserver.ObserverState}");
+                yield return new WaitForSeconds(SpatialMappingManager.Instance.SurfaceObserver.TimeBetweenUpdates + 1f);
+                SpatialMappingManager.Instance.StopObserver();
+
+                array = CreateArray();
+            } while (array == null);
+
+            yield return new WaitForFixedUpdate();
+
+            FindCrossing(array);
         }
 
-        private void ScanFinished() {
-            SpatialMappingManager.Instance.StopObserver();
+        private Tile[,] CreateArray() {
+            Logs.Log("CreateArray");
+            List<Mesh> listMesh = SpatialMappingManager.Instance.GetMeshes();
+            Logs.Log($"Nb of meshs: {listMesh.Count}");
+
+            if (listMesh.Count == 0) return null;
+
             tts.StartSpeaking("Start analysing");
-            List<MeshFilter> filters = SpatialMappingManager.Instance.GetMeshFilters();
-            List<Mesh>       mesh    = SpatialMappingManager.Instance.GetMeshes();
-
-            int    triangle = mesh[0].triangles[0];
-            Bounds bounds   = mesh[0].bounds;
-
-            Vector3 min = bounds.min;
-            Vector3 max = bounds.max;
-
-            var o = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            o.transform.position = min;
-            o.transform.localScale = Vector3.one * Tile.tilesize;
-            o.GetComponent<Renderer>().material.color = Color.red;
-            
-            o = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            o.transform.position   = max;
-            o.transform.localScale = Vector3.one * Tile.tilesize;
-            o.GetComponent<Renderer>().material.color = Color.yellow;
+            Vector3 min = Vector3.zero, max = Vector3.zero;
+            foreach (Mesh mesh in listMesh) {
+                Bounds bounds = mesh.bounds;
+                min = CompareReturn(bounds.min, min);
+                max = CompareReturn(bounds.max, max, false);
+            }
 
             Logs.Log($"Min: {min}");
             Logs.Log($"Max: {max}");
+
+            GameObject o = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            o.transform.position                      = min;
+            o.transform.localScale                    = Vector3.one * Tile.tilesize;
+            o.GetComponent<Renderer>().material.color = Color.red;
+
+            o                                         = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            o.transform.position                      = max;
+            o.transform.localScale                    = Vector3.one * Tile.tilesize;
+            o.GetComponent<Renderer>().material.color = Color.yellow;
 
             float x = max.x - min.x;
             float z = max.z - min.z;
@@ -83,14 +93,42 @@ namespace HololensTemplate {
                     vect.x      += Tile.tilesize / 2;
                     tiles[i, j] =  new Tile(vect);
                 }
+
                 vect.x = min.x;
             }
+
             Logs.Log($"Vect end: {vect}");
             Logs.Log($"Max: {max}");
 
-            foreach (Tile tile in tiles) {
-                tile.Render();
+            foreach (Tile tile in tiles) tile.Render();
+
+            Logs.Log("End CreateArray");
+            return tiles;
+        }
+
+        private void FindCrossing(Tile[,] array) {
+            Logs.Log("Findcrossing");
+            foreach (Tile tile in array) {
+                TileCollider collider = tile.Obj.GetComponent<TileCollider>();
+                Logs.Log($"Collider.Crossed {collider.Crossed}");
+                if (collider.Crossed)
+                    tile.Obj.GetComponent<Renderer>().material.color = Color.red;
+                else
+                    tile.Obj.GetComponent<Renderer>().material.SetColor("_color", Color.white);
             }
+
+            Logs.Log("End findcrossing");
+        }
+
+        private static Vector3 CompareReturn(Vector3 a, Vector3 b, bool lower = true) {
+            Vector3 retour = new Vector3();
+            if (a.x < b.x) { retour.x = lower ? a.x : b.x; } else { retour.x = lower ? b.x : a.x; }
+
+            if (a.y < b.y) { retour.y = lower ? a.y : b.y; } else { retour.y = lower ? b.y : a.y; }
+
+            if (a.z < b.z) { retour.z = lower ? a.z : b.z; } else { retour.z = lower ? b.z : a.z; }
+
+            return retour;
         }
     }
 }
