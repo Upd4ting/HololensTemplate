@@ -6,7 +6,7 @@ using UnityEngine;
 namespace HoloToolkit.Unity.InputModule.Tests
 {
     /// <summary>
-    /// Test button that can be added to any object to make it gaze interactable and 
+    /// ArrayGenerator button that can be added to any object to make it gaze interactable and 
     /// receive pressed and released events.
     /// This class is an example of how an animated button can be created using the input module and Unity.
     /// </summary>

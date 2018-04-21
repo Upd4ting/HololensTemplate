@@ -7,7 +7,7 @@ using Random = System.Random;
 namespace HoloToolkit.Sharing.Tests
 {
     /// <summary>
-    /// Test class for demonstrating creating rooms and anchors.
+    /// ArrayGenerator class for demonstrating creating rooms and anchors.
     /// </summary>
     public class RoomTest : MonoBehaviour
     {

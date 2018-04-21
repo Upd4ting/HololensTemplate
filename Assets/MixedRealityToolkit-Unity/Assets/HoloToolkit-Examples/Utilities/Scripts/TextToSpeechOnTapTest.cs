@@ -6,7 +6,7 @@ using UnityEngine;
 namespace HoloToolkit.Unity.InputModule.Tests
 {
     /// <summary>
-    /// Tap Test for text to speech. This voice will appear to emanate from the object
+    /// Tap ArrayGenerator for text to speech. This voice will appear to emanate from the object
     /// </summary>
     public class TextToSpeechOnTapTest : MonoBehaviour, IInputClickHandler
     {

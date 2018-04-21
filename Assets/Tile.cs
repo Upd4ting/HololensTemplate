@@ -18,12 +18,14 @@ namespace HololensTemplate {
             GameObject scene = GameObject.Find("Scene");
             if (Obj == null) {
                 Obj                      = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Obj.transform.localScale = new Vector3(tilesize / 2 - .01f, .5f, tilesize / 2 - .01f);
+                Obj.transform.localScale = new Vector3(tilesize / 2 - .01f, 1f, tilesize / 2 - .01f);
+
                 Vector3 v = Center;
-                v.y                    += .5f;
+                v.y                    += Obj.transform.localScale.y + .1f;
                 Obj.transform.position =  v;
                 if (scene != null)
                     Obj.transform.parent = scene.transform;
+
                 Obj.AddComponent<TileCollider>();
 
                 Obj.GetComponent<BoxCollider>().isTrigger = true;

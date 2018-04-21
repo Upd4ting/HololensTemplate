@@ -281,7 +281,7 @@ namespace HoloToolkit.Unity
             // Start by assuming the pointer should be placed at the target position.
             Vector3 indicatorPosition = cameraPosition + Depth * (targetPosition - cameraPosition).normalized;
 
-            // Test the target position with the frustum planes except the "far" plane since
+            // ArrayGenerator the target position with the frustum planes except the "far" plane since
             // far away objects should be considered in view.
             bool pointNotInsideIndicatorField = false;
             for (int i = 0; i < 5; ++i)

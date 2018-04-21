@@ -8,7 +8,7 @@ namespace HoloToolkit.Unity.InputModule.Tests
 {
     public class XboxControllerHandlerTest : XboxControllerHandlerBase
     {
-        [Header("Xbox Controller Test Options")]
+        [Header("Xbox Controller ArrayGenerator Options")]
         [SerializeField]
         private float movementSpeedMultiplier = 1f;
 

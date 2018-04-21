@@ -467,7 +467,7 @@ namespace HoloToolkit.Unity
             public static GUIContent blendOp = new GUIContent("Blend Operation", "Blend operation for transparency, etc.");
 
             public static GUIContent cullMode = new GUIContent("Culling Mode", "Type of culling to apply to polygons - typically this is set to backfacing");
-            public static GUIContent zTest = new GUIContent("Z Test", "Depth buffer check type - output is not written if this is false");
+            public static GUIContent zTest = new GUIContent("Z ArrayGenerator", "Depth buffer check type - output is not written if this is false");
             public static GUIContent zWrite = new GUIContent("Z Write", "When to write to the depth buffer");
             public static GUIContent colorWriteMask = new GUIContent("Color Write Mask", "Restricts output to specified color channels only");
         }
