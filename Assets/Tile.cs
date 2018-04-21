@@ -3,6 +3,7 @@
 namespace HololensTemplate {
     public class Tile {
         public const float tilesize = .6f;
+        public const float FreeSize = .1f;
 
         /// <inheritdoc />
         public Tile(Vector3 center, bool obstacle = false) {
@@ -12,7 +13,7 @@ namespace HololensTemplate {
 
         public Vector3    Center   { get; } = Vector3.zero;
         public GameObject Obj      { get; private set; }
-        public bool       Obstacle { get; }
+        public bool       Obstacle { get; set; }
 
         public void Render() {
             GameObject scene = GameObject.Find("Scene");
@@ -21,8 +22,8 @@ namespace HololensTemplate {
                 Obj.transform.localScale = new Vector3(tilesize / 2 - .01f, 1f, tilesize / 2 - .01f);
 
                 Vector3 v = Center;
-                v.y                    += Obj.transform.localScale.y + .1f;
-                Obj.transform.position =  v;
+                v.y                         += Obj.transform.localScale.y + FreeSize;
+                Obj.transform.localPosition =  v;
                 if (scene != null)
                     Obj.transform.parent = scene.transform;
 
