@@ -1,12 +1,17 @@
-﻿using System;
+﻿namespace HololensTemplate.Network {
+    using System;
+    using System.Threading.Tasks;
+#if UNITY_EDITOR
+    using System.Net.Sockets;
 
-using Windows.Networking.Sockets;
+#elif UNITY_WSA
+    using Windows.Networking.Sockets;
 
-namespace HololensTemplate.Network {
+#endif
     public class UniversalTcpServer {
     #if UNITY_EDITOR
         private readonly TcpListener _server;
-            #elif UNITY_WSA
+        #elif UNITY_WSA
         private readonly StreamSocketListener _server;
     #endif
         public UniversalTcpServer(string port) {
@@ -19,7 +24,7 @@ namespace HololensTemplate.Network {
                     OnConnexion?.Invoke(new UniversalTcpClient(client));
                 }
             });
-                        #elif UNITY_WSA
+                #elif UNITY_WSA
             _server = new StreamSocketListener();
             Bind(port);
             _server.ConnectionReceived += (sender, args) => { OnConnexion?.Invoke(new UniversalTcpClient(args.Socket)); };
