@@ -1,33 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace HololensTemplate.Network {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading.Tasks;
 
-using HololensTemplate.Utils;
+    using Newtonsoft.Json;
 
-using Newtonsoft.Json;
+    using UnityEngine;
 
-using UnityEngine;
-
-namespace HololensTemplate.Network {
+    using Utils;
 #if UNITY_EDITOR
-
+    using System.Text;
     using System.Timers;
     using System.Threading;
     using System.Net;
     using System.Net.Sockets;
+
 #elif UNITY_WSA
     using Windows.Networking;
     using Windows.Networking.Sockets;
+    using Windows.Storage.Streams;
 #endif
 
     public class UniversalTcpClient : IDisposable {
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
         private readonly TcpClient _client;
-#elif UNITY_WSA
+    #elif UNITY_WSA
         private readonly StreamSocket _socket;
-                #endif
+        #endif
         private StreamReader _reader;
         private StreamWriter _writer;
 
@@ -35,11 +35,11 @@ namespace HololensTemplate.Network {
 
         public static async Task<List<string>> GetAvaliable(string port) {
             var list = new List<string>();
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             using (var socket = new UdpClient {Ttl = 1}) {
                 var timer = new System.Timers.Timer {
                     AutoReset = false,
-                    Interval  = 1000
+                    Interval  = 500
                 };
 
                 var str          = Encoding.Default.GetBytes("IP?");
@@ -67,46 +67,65 @@ namespace HololensTemplate.Network {
 
                 eventhandler.WaitOne();
             }
-#elif UNITY_WSA
-#endif
+        #elif UNITY_WSA
+            using (var socket = new DatagramSocket()) {
+                var stream = await socket.GetOutputStreamAsync(new HostName(UniversalTcpServer.Multicast), port);
+                Logs.Log($"Getting stream form {UniversalTcpServer.Multicast}:{port}");
+                socket.MessageReceived += async (sender, args) => {
+                    var reader = new StreamReader(args.GetDataStream().AsStreamForRead());
+                    var str = await reader.ReadToEndAsync();
+                    Logs.Log($"{str} from {args.RemoteAddress.RawName}");
+                    list.Add(args.RemoteAddress.RawName);
+                };
+
+                using (var data = new DataWriter(stream)) {
+                    data.WriteString("IP?");
+                    var i = await data.StoreAsync();
+                    var b = await data.FlushAsync();
+                }
+
+                Logs.Log($"Client udp socket: {socket.Information.LocalAddress}:{socket.Information.LocalPort}");
+                await Task.Delay(1000);
+            }
+                #endif
             return list;
         }
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
         internal UniversalTcpClient(TcpClient client) {
             _client = client;
             CreateStreams();
         }
-#elif UNITY_WSA
-        internal UniversalTcpClient(StreamSocket socket){
+    #elif UNITY_WSA
+        internal UniversalTcpClient(StreamSocket socket) {
             _socket = socket;
             CreateStreams();
         }
         #endif
 
         public UniversalTcpClient(string ip, string port) {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             _client = new TcpClient(ip, int.Parse(port));
-#elif UNITY_WSA
+        #elif UNITY_WSA
             _socket = new StreamSocket();
             Connect(new HostName(ip), port);
-#endif
+                #endif
             CreateStreams();
         }
-#if !UNITY_EDITOR && UNITY_WSA
+    #if !UNITY_EDITOR && UNITY_WSA
         private async void Connect(HostName hostname, string port) {
             await _socket.ConnectAsync(hostname, port);
         }
-                                                                                        #endif
+        #endif
         private void CreateStreams() {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             var stream = _client.GetStream();
             _reader = new StreamReader(stream);
             _writer = new StreamWriter(stream) {AutoFlush = true};
-#elif UNITY_WSA
+        #elif UNITY_WSA
             _writer = new StreamWriter(_socket.OutputStream.AsStreamForWrite()) {AutoFlush = true};
             _reader = new StreamReader(_socket.InputStream.AsStreamForRead());
-                                                            #endif
+                #endif
         }
 
         public async Task Write(object obj) {
@@ -117,9 +136,7 @@ namespace HololensTemplate.Network {
             await _writer.WriteLineAsync(str);
         }
 
-        public async Task<object> Read() {
-            return await Read<object>();
-        }
+        public async Task<object> Read() => await Read<object>();
 
         public async Task<T> Read<T>() {
             var value = await _reader.ReadLineAsync();
@@ -135,11 +152,11 @@ namespace HololensTemplate.Network {
         public void Dispose() {
             _reader?.Dispose();
             _writer?.Dispose();
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             _client?.Dispose();
-#elif UNITY_WSA
+        #elif UNITY_WSA
             _socket?.Dispose();
-                                                #endif
+                #endif
         }
     }
 }
